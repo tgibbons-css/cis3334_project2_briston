@@ -29,13 +29,20 @@ class _TimerScreenState extends State<TimerScreen> with AutomaticKeepAliveClient
   bool get wantKeepAlive => true;
 
   @override
-  void initState()
-  {
+  initState()
+   {
     super.initState();
     _timer = null; // Initialize _timer as null.
-    var androidInitialize = const AndroidInitializationSettings('ic_stat_notify.png');
-    var initializationsSettings = InitializationSettings(android: androidInitialize);
-    flutterLocalNotificationsPlugin.initialize(initializationsSettings);
+    initNotifications();
+
+  }
+
+  initNotifications() async {
+    const AndroidInitializationSettings androidInitialize = const AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: androidInitialize,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,);
   }
 
   @override
@@ -46,7 +53,44 @@ class _TimerScreenState extends State<TimerScreen> with AutomaticKeepAliveClient
     super.dispose();
   }
 
+  void showNotificationAndroid(String title, String value) async {
+    print ("--------- showNotificationAndroid - setting Android details notification -----------");
+
+    const AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails('channel_id', 'Channel Name',
+        channelDescription: 'Channel Description',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker');
+    print ("--------- showNotificationAndroid - 22222 -----------");
+    int notification_id = 1;
+    const NotificationDetails notificationDetails =
+    NotificationDetails(android: androidNotificationDetails);
+    print ("--------- showNotificationAndroid - show start -----------");
+
+    await flutterLocalNotificationsPlugin
+        .show(notification_id, title, value, notificationDetails, payload: 'Not present');
+    print ("--------- showNotificationAndroid - show done -----------");
+
+  }
+
+  Future<void> showNotification(String title, String message) async {
+    // Schedule the notification
+    const AndroidNotificationDetails  androidDetails = const AndroidNotificationDetails(
+      'channelId',
+      'Local Notification',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails generalNotificationDetails = NotificationDetails(android: androidDetails);
+
+    await flutterLocalNotificationsPlugin.show(0, title, message, generalNotificationDetails,);
+  }
+
+
   void startTimer() {
+    // Test out the notification
+    showNotification('Timer Done','Your timer has finished!');
     // Cancel The existing timer if it's currently running
     if (_timer?.isActive ?? false) {
       _timer!.cancel();
